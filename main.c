@@ -14,11 +14,11 @@ enum bool { false, true };
 
 struct contact_t {
     // Data
-    char first_name[20+1];
-    char last_name[20+1];
-    char company[30+1];
-    char email[30+1];
-    char tel_number[20+1];
+    char first_name[20+1];  // 21
+    char last_name[20+1];   // 21
+    char company[30+1];     // 31
+    char email[30+1];       // 31
+    char tel_number[20+1];  // 21
 
     // Pointers
     struct contact_t* prev;
@@ -43,6 +43,8 @@ void printEditPropertyMenu(struct contact_t* contact, int code);
 void printSearchContactMenu();
 void printDeleteContactMenu();
 void printSortContactsMenu();
+void printMemoryMenu();
+void printSaveToFileMenu();
 void printSecret(int code);
 
 // PRINT HELPER
@@ -61,6 +63,8 @@ void deleteLastContact();
 void sortByCriterion(int criterion);
 void swapContacts(struct contact_t* first);
 enum bool firstFollowsSecond(struct contact_t* first, struct contact_t* second, int criterion);
+void saveToFile(const char* fileName);
+void loadFromFile();
 
 // LIST HELPER
 int getIndexOfContact(struct contact_t* contact);
@@ -202,6 +206,51 @@ enum bool firstFollowsSecond(struct contact_t* first, struct contact_t* second, 
     return (enum bool) (compareResult > 0);
 }
 
+/*
+ *      SAVE/LOAD FILE
+ * */
+
+void saveToFile(const char* fileName) {
+    struct contact_t* current = head;
+    FILE *f;
+
+    f = fopen(fileName, "w");
+
+    if (!f) {
+        printf("\nError: Couldn't open file");
+        printf("\n");
+        return;
+    }
+
+    while (current != NULL) {
+        fprintf(f, "%s\n", current->first_name);
+        fprintf(f, "%s\n", current->last_name);
+        fprintf(f, "%s\n", current->company);
+        fprintf(f, "%s\n", current->email);
+        fprintf(f, "%s\n", current->tel_number);
+
+        /*  NICE
+        fprintf(f, "First Name: %s\n", current->first_name);
+        fprintf(f, "Last Name : %s\n", current->last_name);
+        fprintf(f, "Company   : %s\n", current->company);
+        fprintf(f, "Email     : %s\n", current->email);
+        fprintf(f, "Telephone : %s\n", current->tel_number);
+        fprintf(f, "\n");
+         */
+
+        current = current->next;
+    }
+
+    fclose(f);
+
+    printf("\n -> Saved to file '%s' successfully.", fileName);
+    printf("\n");
+}
+
+void loadFromFile() {
+    //FILE *f = fopen(FILE_NAME, "r");
+}
+
 /* HELPER */
 
 // returns the index of a given contact in the list
@@ -271,6 +320,10 @@ void printMainMenu() {
     printf("\n(4) Search for Contact");
     printf("\n(5) Delete Contact");
     printf("\n(6) Sort Contacts");
+    printf("\n(7) Calculate Memory");
+    printf("\n");
+    printf("\n(8) Load from file");
+    printf("\n(9) Save to file");
     printf("\n");
     printf("\n(0) Close Program");
     printf("\n");
@@ -296,6 +349,15 @@ void printMainMenu() {
             break;
         case 6:
             printSortContactsMenu();
+            break;
+        case 7:
+            printMemoryMenu();
+            break;
+        case 8:
+            loadFromFile();
+            break;
+        case 9:
+            printSaveToFileMenu();
             break;
         case 0:
             return;
@@ -331,7 +393,7 @@ void printAddContactMenu() {
 
     addContact(newContact);
 
-    printf("\n%s %s was added to your Address Book.", newContact.first_name, newContact.last_name);
+    printf("\n -> %s %s was added to your Address Book.", newContact.first_name, newContact.last_name);
     printf("\n");
 
     printContinueMenu();
@@ -371,7 +433,7 @@ void printDeleteContactMenu() {
                 printDeleteContactMenu();
                 return;
             } else {
-                printf("\n%s %s was deleted from your Address Book.", deleted->first_name, deleted->last_name);
+                printf("\n -> %s %s was deleted from your address book.", deleted->first_name, deleted->last_name);
                 printf("\n");
             }
         }
@@ -491,7 +553,7 @@ void printEditPropertyMenu(struct contact_t* contact, int code) {
             break;
     }
     printf("\n");
-    printf("Change was successful.");
+    printf(" -> Change was successful.");
     printf("\n");
 
     printContinueMenu();
@@ -532,13 +594,13 @@ void printSearchContactMenu() {
     }
 
     if (entriesFound == 0) {
-        printf("\n-> Couldn't find any entries for this query.");
+        printf("\n -> Couldn't find any entries for this query.");
         printf("\n");
     } else if (entriesFound == 1) {
-        printf("\n-> Found 1 entry.");
+        printf("\n -> Found 1 entry.");
         printf("\n");
     } else {
-        printf("\n-> Found %d entries.", entriesFound);
+        printf("\n -> Found %d entries.", entriesFound);
         printf("\n");
     }
 
@@ -566,7 +628,7 @@ void printSortContactsMenu() {
 
     if (a > 0 && a < 5) {
         sortByCriterion(a);
-        printf("\nSorted list successfully.");
+        printf("\n -> Sorted list successfully.");
         printf("\n");
 
         printContinueMenu();
@@ -578,6 +640,43 @@ void printSortContactsMenu() {
         printSortContactsMenu();
     }
 }
+
+void printMemoryMenu() {
+    printf("\n -> Your address book has a size of %lu bytes.", getLength() * sizeof(struct contact_t));
+    printf("\n");
+
+    printContinueMenu();
+    printMainMenu();
+}
+
+void printSaveToFileMenu() {
+    char fileName[30+1];
+
+    printf("\n--------------------------------");
+    printf("\n------ Save Address Book -------");
+    printf("\n");
+    printf("\n- Name your file -");
+    printf("\n");
+    printf("\nPlease enter: ");
+
+    scanf("%s", fileName);
+
+    saveToFile(fileName);
+
+    printContinueMenu();
+    printMainMenu();
+}
+
+void printLoadFromFileMenu() {
+    loadFromFile();
+
+    //printf("\n -> Loaded from file '%s' successfully.", FILE_NAME);
+    printf("\n");
+
+    printContinueMenu();
+    printMainMenu();
+}
+
 
 
 /* HELPER */
@@ -612,7 +711,7 @@ void printContinueMenu() {
 }
 // prints 'You didn't select anything.' and waits for 'enter key'
 void printSelectionError() {
-    printf("\nYou didn't select anything.");
+    printf("\n -> You didn't select anything.");
     printf("\n");
     printContinueMenu();
 }
