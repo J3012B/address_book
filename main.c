@@ -40,6 +40,7 @@ void printAddContactMenu();
 void printEditContactMenu();
 void printEditSingleContactMenu(struct contact_t* contact);
 void printEditPropertyMenu(struct contact_t* contact, int code);
+void printSearchContactMenu();
 void printDeleteContactMenu();
 void printSortContactsMenu();
 void printSecret(int code);
@@ -247,6 +248,9 @@ struct contact_t* getLastContact() {
 }
 
 
+
+
+
 /*
  *      MENUS -------------------------------------------
  * */
@@ -264,8 +268,9 @@ void printMainMenu() {
     printf("\n(1) Add Contact");
     printf("\n(2) Show Contacts");
     printf("\n(3) Edit Contact");
-    printf("\n(4) Delete Contact");
-    printf("\n(5) Sort Contacts");
+    printf("\n(4) Search for Contact");
+    printf("\n(5) Delete Contact");
+    printf("\n(6) Sort Contacts");
     printf("\n");
     printf("\n(0) Close Program");
     printf("\n");
@@ -284,9 +289,12 @@ void printMainMenu() {
             printEditContactMenu();
             break;
         case 4:
-            printDeleteContactMenu();
+            printSearchContactMenu();
             break;
         case 5:
+            printDeleteContactMenu();
+            break;
+        case 6:
             printSortContactsMenu();
             break;
         case 0:
@@ -451,8 +459,6 @@ void printEditSingleContactMenu(struct contact_t* contact) {
         printEditSingleContactMenu(contact);
     }
 
-
-    // TODO: Edit Single Contact
 }
 void printEditPropertyMenu(struct contact_t* contact, int code) {
     printf("\n--------------------------------");
@@ -490,6 +496,54 @@ void printEditPropertyMenu(struct contact_t* contact, int code) {
 
     printContinueMenu();
     printEditSingleContactMenu(contact);
+}
+
+void printSearchContactMenu() {
+    char searchString[40+1]; // User Input
+    char fullName[40+1];     // first_name + " " + last_name
+    struct contact_t* current = head;
+    int entriesFound = 0;
+
+    printf("\n--------------------------------");
+    printf("\n------ Search for Contact ------");
+    printf("\n");
+    printf("\n- Search by full name -");
+    printf("\n");
+    printf("\nWill print all contacts containing\nyour query in any of their data.");
+    printf("\n");
+    printf("\nPlease enter: ");
+    scanf("%s", searchString);
+
+    while (current != NULL) {
+        //sprintf(fullName, "%s %s", current->first_name, current->last_name);
+
+        if (strstr(current->first_name, searchString) ||
+            strstr(current->last_name, searchString) ||
+            strstr(current->email, searchString) ||
+            strstr(current->company, searchString) ||
+            strstr(current->tel_number, searchString)) {
+            printf("\n------- Contact (%d) -----------", getIndexOfContact(current) + 1);
+            printContact(current);
+
+            entriesFound++;
+        }
+
+        current = current->next;
+    }
+
+    if (entriesFound == 0) {
+        printf("\n-> Couldn't find any entries for this query.");
+        printf("\n");
+    } else if (entriesFound == 1) {
+        printf("\n-> Found 1 entry.");
+        printf("\n");
+    } else {
+        printf("\n-> Found %d entries.", entriesFound);
+        printf("\n");
+    }
+
+    printContinueMenu();
+    printMainMenu();
 }
 
 void printSortContactsMenu() {
@@ -644,7 +698,7 @@ void printSecret(int code) {
  *  4. sort list    YES
  *  5. save in file (File System) NO
  *  6. load from file (File System) NO
- *  7. search for ...   NO
+ *  7. search for ...   YES
  *  8. calculate memory (Extras)    NO
  *  9. edit element YES
  *  0. exit/end     YES
