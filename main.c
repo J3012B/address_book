@@ -45,6 +45,7 @@ void printDeleteContactMenu();
 void printSortContactsMenu();
 void printMemoryMenu();
 void printSaveToFileMenu();
+void printLoadFromFileMenu();
 void printSecret(int code);
 
 // PRINT HELPER
@@ -60,11 +61,12 @@ void addContact(struct contact_t contact);
 void deleteContact(int index);
 void deleteFirstContact();
 void deleteLastContact();
+void deleteAllContacts();
 void sortByCriterion(int criterion);
 void swapContacts(struct contact_t* first);
 enum bool firstFollowsSecond(struct contact_t* first, struct contact_t* second, int criterion);
 void saveToFile(const char* fileName);
-void loadFromFile();
+void loadFromFile(const char* fileName);
 
 // LIST HELPER
 int getIndexOfContact(struct contact_t* contact);
@@ -144,6 +146,19 @@ void deleteLastContact() {
     free(last);
 }
 
+// deletes all contacts
+void deleteAllContacts() {
+    struct contact_t* current = head;
+
+    while (current->next != NULL) {
+        free(current->prev);
+
+        current = current->next;
+    }
+    free(current);
+    head = NULL;
+}
+
 /*
  *      SORTING
  * */
@@ -216,8 +231,8 @@ void saveToFile(const char* fileName) {
 
     f = fopen(fileName, "w");
 
-    if (!f) {
-        printf("\nError: Couldn't open file");
+    if (f == NULL) {
+        printf("\nError: Couldn't save file");
         printf("\n");
         return;
     }
@@ -247,8 +262,58 @@ void saveToFile(const char* fileName) {
     printf("\n");
 }
 
-void loadFromFile() {
-    //FILE *f = fopen(FILE_NAME, "r");
+void loadFromFile(const char* fileName) {
+    FILE *f = fopen(fileName, "r");
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    int index = 0;
+    struct contact_t newContact = {0};
+
+    // Check if file could be opened
+    if (f == NULL) {
+        printf("\nError: Couldn't load file");
+        printf("\n");
+        return;
+    }
+
+    // delete all entries
+    deleteAllContacts();
+
+    while ((read = getline(&line, &len, f)) != -1) {
+        //printf("\nRetrieved line of length %zu :", read);
+        //printf("%s", line);
+        line[strlen(line) - 1] = 0;
+
+        switch (index % 5) {
+            case 0:
+                strcpy(newContact.first_name, line);
+                break;
+            case 1:
+                strcpy(newContact.last_name, line);
+                break;
+            case 2:
+                strcpy(newContact.company, line);
+                break;
+            case 3:
+                strcpy(newContact.email, line);
+                break;
+            case 4:
+                strcpy(newContact.tel_number, line);
+                addContact(newContact);
+                break;
+            default:
+                break;
+        }
+
+        index++;
+    }
+
+    fclose(f);
+    if (line) free(line);
+
+    printf("\n -> Loaded from file '%s' successfully.", fileName);
+    printf("\n");
 }
 
 /* HELPER */
@@ -354,7 +419,7 @@ void printMainMenu() {
             printMemoryMenu();
             break;
         case 8:
-            loadFromFile();
+            printLoadFromFileMenu();
             break;
         case 9:
             printSaveToFileMenu();
@@ -668,10 +733,20 @@ void printSaveToFileMenu() {
 }
 
 void printLoadFromFileMenu() {
-    loadFromFile();
+    char fileName[30+1];
+
+    printf("\n--------------------------------");
+    printf("\n------ Load Address Book -------");
+    printf("\n");
+    printf("\n- Name of file -");
+    printf("\n");
+    printf("\nPlease enter: ");
+
+    scanf("%s", fileName);
+
+    loadFromFile(fileName);
 
     //printf("\n -> Loaded from file '%s' successfully.", FILE_NAME);
-    printf("\n");
 
     printContinueMenu();
     printMainMenu();
