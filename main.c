@@ -134,8 +134,12 @@ void deleteContact(int index) {
 // deletes first contact in list
 void deleteFirstContact() {
     struct contact_t* todelete = head;
-    head->next->prev = NULL;
-    head = head->next;
+    if(head->next != NULL) {
+        head->next->prev = NULL;
+        head = head->next;
+    } else {
+        head = NULL
+    }
     free(todelete);
 }
 
