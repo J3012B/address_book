@@ -3,11 +3,8 @@
 #include <string.h>
 #include <dirent.h>
 
-
-
-
 /*
- *      STRUCTS ------------------------------------------
+ *      STRUCT DECLARATION -------------------------------------------------------
  * */
 
 typedef struct contact_t {
@@ -28,55 +25,100 @@ contact_t* head;
 
 
 /*
- *      FUNCTION DECLARATIONS
+ *      FUNCTION DECLARATIONS ----------------------------------------------------
  * */
 
-// PRINT MENU
+/*
+ * PRINT MENU
+ * */
+
+// Main Menu
 void printMainMenu();
-void printContinueMenu();
+// Add Contact
 void printAddContactMenu();
+// Show Contacts
+void printContacts();
+// Edit Contacts
 void printEditContactMenu();
 void printEditSingleContactMenu(contact_t* contact);
 void printEditPropertyMenu(contact_t* contact, int code);
+// Search Contact
 void printSearchContactMenu();
+// Delete Contact
 void printDeleteContactMenu();
+// Sort Contacts
 void printSortContactsMenu();
+// Calculate Memory
 void printMemoryMenu();
+// Save to File
 void printSaveToFileMenu();
+// Load from File
 void printLoadFromFileMenu();
-void printSecret(int code);
-
-// PRINT HELPER
-void printContacts();
-void printContact(contact_t* contact);
-void printContactNames();
-void printContactName(contact_t* contact);
-void printSelectionError();
-void printTextFiles();
-
-// LIST EDIT
-contact_t* createNewContact(contact_t person);
-void addContact(contact_t contact);
-void deleteContact(int index);
-void deleteFirstContact();
-void deleteLastContact();
-void deleteAllContacts();
-void sortByCriterion(int criterion);
-void swapContacts(contact_t* first);
-short firstFollowsSecond(contact_t* first, contact_t* second, int criterion);
-void saveToFile(const char* fileName);
-void loadFromFile(const char* fileName);
-
-// LIST HELPER
-int getIndexOfContact(contact_t* contact);
-contact_t* getContactAtIndex(int index);
-int getLength();
-contact_t* getLastContact();
-void fillList();
 
 
 /*
- *      LIST ---------------------------------------------
+ * PRINT HELPER
+ * */
+
+// prints contact
+void printContact(contact_t* contact);
+// prints names of all contacts
+void printContactNames();
+// prints name of single contact
+void printContactName(contact_t* contact);
+// prints '- You didn't select anything -'
+void printSelectionError();
+// prints 'Please press Enter to continue'
+void printContinueMenu();
+// prints some secret or handles bad input
+void printSecret(int code);
+// prints all files in './text-files'
+void printTextFiles();
+
+/*
+ * LIST EDIT
+ * */
+
+// creates new contact entry
+contact_t* createNewContact(contact_t person);
+// adds contact to the end of the list
+void addContact(contact_t contact);
+// deletes contact at index
+void deleteContact(int index);
+// deletes first contact in list
+void deleteFirstContact();
+// deletes last contact in list
+void deleteLastContact();
+// deletes every contact
+void deleteAllContacts();
+// sorts by given Criterion (from 1-4)
+void sortByCriterion(int criterion);
+// swaps given contact with its following entry
+void swapContacts(contact_t* first);
+// compares two contacts by given criterion (from 1-4)
+short firstFollowsSecond(contact_t* first, contact_t* second, int criterion);
+// saves list to file
+void saveToFile(const char* fileName);
+// loads list from file
+void loadFromFile(const char* fileName);
+
+/*
+ * LIST HELPER
+ * */
+
+// returns index of given contact in list
+int getIndexOfContact(contact_t* contact);
+// returns contact at given index in list
+contact_t* getContactAtIndex(int index);
+// returns the number of contacts in list
+int getLength();
+// returns the last contact from the list
+contact_t* getLastContact();
+// fills the list with sample data
+void fillList();
+
+/*
+ *      LIST FUNCTIONS -----------------------------------------------------------
  * */
 
 // Creates a new contact in memory and returns its pointer
@@ -273,7 +315,6 @@ void loadFromFile(const char* fileName) {
     FILE *f = fopen(fullFileName, "r");
     char* line = NULL;
     size_t len = 0;
-    ssize_t read;
     int index = 0;
     contact_t newContact = {0};
 
@@ -371,7 +412,7 @@ contact_t* getLastContact() {
 
 
 /*
- *      MENUS -------------------------------------------
+ *      MENUS --------------------------------------------------------------------
  * */
 
 
