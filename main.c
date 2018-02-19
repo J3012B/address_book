@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 
 
 enum bool { false, true };
@@ -54,6 +55,7 @@ void printContact(struct contact_t* contact);
 void printContactNames();
 void printContactName(struct contact_t* contact);
 void printSelectionError();
+void printTextFiles();
 
 // LIST EDIT
 struct contact_t* createNewContact(struct contact_t person);
@@ -150,13 +152,15 @@ void deleteLastContact() {
 void deleteAllContacts() {
     struct contact_t* current = head;
 
-    while (current->next != NULL) {
-        free(current->prev);
+    if (current != NULL) {
+        while (current->next != NULL) {
+            free(current->prev);
 
-        current = current->next;
+            current = current->next;
+        }
+        free(current);
+        head = NULL;
     }
-    free(current);
-    head = NULL;
 }
 
 /*
@@ -182,9 +186,10 @@ void sortByCriterion(int criterion) {
 void swapContacts(struct contact_t* first) {
 
     if (first->next) {
-        struct contact_t* before = first->prev;
+        struct contact_t* before = first->prev; // NULL
         struct contact_t* second = first->next;
-        struct contact_t* after = second->next;
+        struct contact_t* after = second->next; // NULL
+
 
         second->next = first;
         first->next = after;
@@ -227,9 +232,11 @@ enum bool firstFollowsSecond(struct contact_t* first, struct contact_t* second, 
 
 void saveToFile(const char* fileName) {
     struct contact_t* current = head;
+    char fullFileName[100+1];
+    sprintf(fullFileName, "./text-files/%s", fileName);
     FILE *f;
 
-    f = fopen(fileName, "w");
+    f = fopen(fullFileName, "w");
 
     if (f == NULL) {
         printf("\nError: Couldn't save file");
@@ -263,7 +270,10 @@ void saveToFile(const char* fileName) {
 }
 
 void loadFromFile(const char* fileName) {
-    FILE *f = fopen(fileName, "r");
+    char fullFileName[100+1];
+    sprintf(fullFileName, "./text-files/%s", fileName);
+
+    FILE *f = fopen(fullFileName, "r");
     char* line = NULL;
     size_t len = 0;
     ssize_t read;
@@ -281,8 +291,6 @@ void loadFromFile(const char* fileName) {
     deleteAllContacts();
 
     while ((read = getline(&line, &len, f)) != -1) {
-        //printf("\nRetrieved line of length %zu :", read);
-        //printf("%s", line);
         line[strlen(line) - 1] = 0;
 
         switch (index % 5) {
@@ -720,8 +728,9 @@ void printSaveToFileMenu() {
     printf("\n--------------------------------");
     printf("\n------ Save Address Book -------");
     printf("\n");
-    printf("\n- Name your file -");
+    printf("\n- Enter name of file to save to (either existing or new one) -");
     printf("\n");
+    printTextFiles();
     printf("\nPlease enter: ");
 
     scanf("%s", fileName);
@@ -738,8 +747,9 @@ void printLoadFromFileMenu() {
     printf("\n--------------------------------");
     printf("\n------ Load Address Book -------");
     printf("\n");
-    printf("\n- Name of file -");
+    printf("\n- Enter name of file to load -");
     printf("\n");
+    printTextFiles();
     printf("\nPlease enter: ");
 
     scanf("%s", fileName);
@@ -789,6 +799,20 @@ void printSelectionError() {
     printf("\n -> You didn't select anything.");
     printf("\n");
     printContinueMenu();
+}
+// prints all files in ./text-files
+void printTextFiles() {
+    DIR *d;
+    struct dirent *dir;
+    d = opendir("./text-files");
+    if (d) {
+        printf("\nFiles in './text-files': \n");
+        while ((dir = readdir(d)) != NULL) {
+            printf("\n%s", dir->d_name);
+        }
+        closedir(d);
+        printf("\n");
+    }
 }
 
 
@@ -870,10 +894,10 @@ void printSecret(int code) {
  *  2. show list    YES
  *  3. delete element   YES
  *  4. sort list    YES
- *  5. save in file (File System) NO
- *  6. load from file (File System) NO
+ *  5. save in file (File System) YES
+ *  6. load from file (File System) YES
  *  7. search for ...   YES
- *  8. calculate memory (Extras)    NO
+ *  8. calculate memory (Extras)    YES
  *  9. edit element YES
  *  0. exit/end     YES
  *
