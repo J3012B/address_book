@@ -4,9 +4,6 @@
 #include <dirent.h>
 
 
-typedef enum bool { false, true } bool;
-
-
 
 
 /*
@@ -66,7 +63,7 @@ void deleteLastContact();
 void deleteAllContacts();
 void sortByCriterion(int criterion);
 void swapContacts(contact_t* first);
-bool firstFollowsSecond(contact_t* first, contact_t* second, int criterion);
+short firstFollowsSecond(contact_t* first, contact_t* second, int criterion);
 void saveToFile(const char* fileName);
 void loadFromFile(const char* fileName);
 
@@ -203,7 +200,7 @@ void swapContacts(contact_t* first) {
 }
 
 // compares specific property (criterion) of two contacts
-enum bool firstFollowsSecond(contact_t* first, contact_t* second, int criterion) {
+short firstFollowsSecond(contact_t* first, contact_t* second, int criterion) {
     int compareResult = 0;
 
     switch (criterion) {
@@ -223,7 +220,7 @@ enum bool firstFollowsSecond(contact_t* first, contact_t* second, int criterion)
             break;
     }
 
-    return (enum bool) (compareResult > 0);
+    return (short) (compareResult > 0);
 }
 
 /*
@@ -883,6 +880,7 @@ void printSecret(int code) {
 
 
 /*
+ *
  * REQUIREMENTS:
  *  1. add element
  *  2. show list
@@ -894,7 +892,5 @@ void printSecret(int code) {
  *  8. calculate memory (Extras)
  *  9. edit element
  *  0. exit/end
- *
- *
  *
  * */
