@@ -4,7 +4,7 @@
 #include <dirent.h>
 
 
-enum bool { false, true };
+typedef enum bool { false, true } bool;
 
 
 
@@ -13,7 +13,7 @@ enum bool { false, true };
  *      STRUCTS ------------------------------------------
  * */
 
-struct contact_t {
+typedef struct contact_t {
     // Data
     char first_name[20+1];  // 21
     char last_name[20+1];   // 21
@@ -24,10 +24,10 @@ struct contact_t {
     // Pointers
     struct contact_t* prev;
     struct contact_t* next;
-};
+} contact_t;
 
 // TODO: don't declare as global variable
-struct contact_t* head;
+contact_t* head;
 
 
 /*
@@ -39,8 +39,8 @@ void printMainMenu();
 void printContinueMenu();
 void printAddContactMenu();
 void printEditContactMenu();
-void printEditSingleContactMenu(struct contact_t* contact);
-void printEditPropertyMenu(struct contact_t* contact, int code);
+void printEditSingleContactMenu(contact_t* contact);
+void printEditPropertyMenu(contact_t* contact, int code);
 void printSearchContactMenu();
 void printDeleteContactMenu();
 void printSortContactsMenu();
@@ -51,30 +51,30 @@ void printSecret(int code);
 
 // PRINT HELPER
 void printContacts();
-void printContact(struct contact_t* contact);
+void printContact(contact_t* contact);
 void printContactNames();
-void printContactName(struct contact_t* contact);
+void printContactName(contact_t* contact);
 void printSelectionError();
 void printTextFiles();
 
 // LIST EDIT
-struct contact_t* createNewContact(struct contact_t person);
-void addContact(struct contact_t contact);
+contact_t* createNewContact(contact_t person);
+void addContact(contact_t contact);
 void deleteContact(int index);
 void deleteFirstContact();
 void deleteLastContact();
 void deleteAllContacts();
 void sortByCriterion(int criterion);
-void swapContacts(struct contact_t* first);
-enum bool firstFollowsSecond(struct contact_t* first, struct contact_t* second, int criterion);
+void swapContacts(contact_t* first);
+bool firstFollowsSecond(contact_t* first, contact_t* second, int criterion);
 void saveToFile(const char* fileName);
 void loadFromFile(const char* fileName);
 
 // LIST HELPER
-int getIndexOfContact(struct contact_t* contact);
-struct contact_t* getContactAtIndex(int index);
+int getIndexOfContact(contact_t* contact);
+contact_t* getContactAtIndex(int index);
 int getLength();
-struct contact_t* getLastContact();
+contact_t* getLastContact();
 void fillList();
 
 
@@ -83,8 +83,8 @@ void fillList();
  * */
 
 // Creates a new contact in memory and returns its pointer
-struct contact_t* createNewContact(struct contact_t person) {
-    struct contact_t* newContact = (struct contact_t*)malloc(sizeof(struct contact_t));
+contact_t* createNewContact(contact_t person) {
+    contact_t* newContact = (contact_t*)malloc(sizeof(contact_t));
     strcpy(newContact->first_name, person.first_name);
     strcpy(newContact->last_name, person.last_name);
     strcpy(newContact->company, person.company);
@@ -98,9 +98,9 @@ struct contact_t* createNewContact(struct contact_t person) {
 }
 
 // Adds a contact to the end of the list
-void addContact(struct contact_t contact) {
-    struct contact_t* current = head;
-    struct contact_t* newContact = createNewContact(contact);
+void addContact(contact_t contact) {
+    contact_t* current = head;
+    contact_t* newContact = createNewContact(contact);
     if (head == NULL) {
         head = newContact;
         return;
@@ -123,7 +123,7 @@ void deleteContact(int index) {
         if (index == 0) { deleteFirstContact(); return; }
         if (index == getLength()-1) { deleteLastContact(); return; }
 
-        struct contact_t* current;
+        contact_t* current;
         current = getContactAtIndex(index);
 
         current->prev->next = current->next;
@@ -135,7 +135,7 @@ void deleteContact(int index) {
 
 // deletes first contact in list
 void deleteFirstContact() {
-    struct contact_t* todelete = head;
+    contact_t* todelete = head;
     head->next->prev = NULL;
     head = head->next;
     free(todelete);
@@ -143,14 +143,14 @@ void deleteFirstContact() {
 
 // deletes last contact in list
 void deleteLastContact() {
-    struct contact_t* last = getLastContact();
+    contact_t* last = getLastContact();
     last->prev->next = NULL;
     free(last);
 }
 
 // deletes all contacts
 void deleteAllContacts() {
-    struct contact_t* current = head;
+    contact_t* current = head;
 
     if (current != NULL) {
         while (current->next != NULL) {
@@ -171,7 +171,7 @@ void deleteAllContacts() {
 void sortByCriterion(int criterion) {
 
     int i, j;
-    struct contact_t* current;
+    contact_t* current;
 
     for (i = getLength(); i > 1; i--) {
         for (j = 0; j < i-1; j++) {
@@ -183,12 +183,12 @@ void sortByCriterion(int criterion) {
 }
 
 // swaps contact with its next contact
-void swapContacts(struct contact_t* first) {
+void swapContacts(contact_t* first) {
 
     if (first->next) {
-        struct contact_t* before = first->prev; // NULL
-        struct contact_t* second = first->next;
-        struct contact_t* after = second->next; // NULL
+        contact_t* before = first->prev; // NULL
+        contact_t* second = first->next;
+        contact_t* after = second->next; // NULL
 
 
         second->next = first;
@@ -203,7 +203,7 @@ void swapContacts(struct contact_t* first) {
 }
 
 // compares specific property (criterion) of two contacts
-enum bool firstFollowsSecond(struct contact_t* first, struct contact_t* second, int criterion) {
+enum bool firstFollowsSecond(contact_t* first, contact_t* second, int criterion) {
     int compareResult = 0;
 
     switch (criterion) {
@@ -231,7 +231,7 @@ enum bool firstFollowsSecond(struct contact_t* first, struct contact_t* second, 
  * */
 
 void saveToFile(const char* fileName) {
-    struct contact_t* current = head;
+    contact_t* current = head;
     char fullFileName[100+1];
     sprintf(fullFileName, "./text-files/%s", fileName);
     FILE *f;
@@ -278,7 +278,7 @@ void loadFromFile(const char* fileName) {
     size_t len = 0;
     ssize_t read;
     int index = 0;
-    struct contact_t newContact = {0};
+    contact_t newContact = {0};
 
     // Check if file could be opened
     if (f == NULL) {
@@ -290,7 +290,7 @@ void loadFromFile(const char* fileName) {
     // delete all entries
     deleteAllContacts();
 
-    while ((read = getline(&line, &len, f)) != -1) {
+    while (getline(&line, &len, f) != -1) {
         line[strlen(line) - 1] = 0;
 
         switch (index % 5) {
@@ -327,9 +327,9 @@ void loadFromFile(const char* fileName) {
 /* HELPER */
 
 // returns the index of a given contact in the list
-int getIndexOfContact(struct contact_t* contact) {
+int getIndexOfContact(contact_t* contact) {
     int index = 0;
-    struct contact_t* current = head;
+    contact_t* current = head;
     while (current != NULL) {
         if (current == contact) {
             return index;
@@ -340,8 +340,8 @@ int getIndexOfContact(struct contact_t* contact) {
     return -1; // Couldn't find element
 }
 // returns the pointer to the contact at index
-struct contact_t* getContactAtIndex(int index) {
-    struct contact_t* current = head;
+contact_t* getContactAtIndex(int index) {
+    contact_t* current = head;
     int length = getLength();
     if (index < 0) index = 0;
     if (index >= length - 1) index = length-1;
@@ -353,7 +353,7 @@ struct contact_t* getContactAtIndex(int index) {
 // returns length of list
 int getLength() {
     int length = 0;
-    struct contact_t* current = head;
+    contact_t* current = head;
     while (current != NULL) {
         length++;
         current = current->next;
@@ -361,8 +361,8 @@ int getLength() {
     return length;
 }
 // returns pointer to last element in list ('NULL' when list is empty)
-struct contact_t* getLastContact() {
-    struct contact_t* current = head;
+contact_t* getLastContact() {
+    contact_t* current = head;
     while (current->next != NULL) {
         current = current->next;
     }
@@ -442,13 +442,7 @@ void printMainMenu() {
 }
 
 void printAddContactMenu() {
-    struct contact_t newContact = {0};
-
-    /*char first_name[20+1];
-    char last_name[20+1];
-    char company[30+1];
-    char email[30+1];
-    char tel_number[20+1];*/
+    contact_t newContact = {0};
 
     printf("\n--------------------------------");
     printf("\n-------- Add Contact -----------");
@@ -498,7 +492,7 @@ void printDeleteContactMenu() {
         } else {
             a--;
 
-            struct contact_t* deleted = getContactAtIndex(a);
+            contact_t* deleted = getContactAtIndex(a);
             deleteContact(a);
 
             if (a < 0 || a >= oldLen) {
@@ -517,7 +511,7 @@ void printDeleteContactMenu() {
 }
 
 void printContacts() {
-    struct contact_t* current = head;
+    contact_t* current = head;
 
     printf("\n--------------------------------");
     printf("\n-------- My Contacts -----------");
@@ -565,7 +559,7 @@ void printEditContactMenu() {
     }
 
 }
-void printEditSingleContactMenu(struct contact_t* contact) {
+void printEditSingleContactMenu(contact_t* contact) {
     int a;
 
     printf("\n--------------------------------");
@@ -595,7 +589,7 @@ void printEditSingleContactMenu(struct contact_t* contact) {
     }
 
 }
-void printEditPropertyMenu(struct contact_t* contact, int code) {
+void printEditPropertyMenu(contact_t* contact, int code) {
     printf("\n--------------------------------");
     printf("\n--------- Edit Contact ---------");
     printf("\n");
@@ -636,7 +630,7 @@ void printEditPropertyMenu(struct contact_t* contact, int code) {
 void printSearchContactMenu() {
     char searchString[40+1]; // User Input
     char fullName[40+1];     // first_name + " " + last_name
-    struct contact_t* current = head;
+    contact_t* current = head;
     int entriesFound = 0;
 
     printf("\n--------------------------------");
@@ -715,7 +709,7 @@ void printSortContactsMenu() {
 }
 
 void printMemoryMenu() {
-    printf("\n -> Your address book has a size of %lu bytes.", getLength() * sizeof(struct contact_t));
+    printf("\n -> Your address book has a size of %lu bytes.", getLength() * sizeof(contact_t));
     printf("\n");
 
     printContinueMenu();
@@ -767,7 +761,7 @@ void printLoadFromFileMenu() {
 /* HELPER */
 
 // prints single contact
-void printContact(struct contact_t* contact) {
+void printContact(contact_t* contact) {
     //printf("\n--------------------------------");
     printf("\nName : %s %s (%s)", contact->first_name, contact->last_name, contact->company);
     printf("\nEmail: %s", contact->email);
@@ -776,7 +770,7 @@ void printContact(struct contact_t* contact) {
 }
 // prints only the names of all contacts
 void printContactNames() {
-    struct contact_t* current = head;
+    contact_t* current = head;
     while (current != NULL) {
         printContactName(current);
         current = current->next;
@@ -784,7 +778,7 @@ void printContactNames() {
     printf("\n");
 }
 // prints only the name of one contact
-void printContactName(struct contact_t* contact) {
+void printContactName(contact_t* contact) {
     printf("\n(%d) %s %s (%s)", getIndexOfContact(contact) + 1, contact->first_name, contact->last_name, contact->company);
 }
 // prints '- Press Enter to continue -' and waits for 'enter' key
@@ -833,7 +827,7 @@ int main() {
 
 void fillList() {
 
-    struct contact_t person = {0};
+    contact_t person = {0};
 
     strcpy(person.first_name, "Bill");
     strcpy(person.last_name, "Gates");
@@ -889,17 +883,17 @@ void printSecret(int code) {
 
 
 /*
- * ANFORDERUNGEN:
- *  1. add element  YES
- *  2. show list    YES
- *  3. delete element   YES
- *  4. sort list    YES
- *  5. save in file (File System) YES
- *  6. load from file (File System) YES
- *  7. search for ...   YES
- *  8. calculate memory (Extras)    YES
- *  9. edit element YES
- *  0. exit/end     YES
+ * REQUIREMENTS:
+ *  1. add element
+ *  2. show list
+ *  3. delete element
+ *  4. sort list
+ *  5. save in file (File System)
+ *  6. load from file (File System)
+ *  7. search for ...
+ *  8. calculate memory (Extras)
+ *  9. edit element
+ *  0. exit/end
  *
  *
  *
