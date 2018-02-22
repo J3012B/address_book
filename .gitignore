@@ -1,3 +1,4 @@
 address_book
 *.txt
+.idea
 !CMakeLists.txt
