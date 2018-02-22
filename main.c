@@ -684,7 +684,6 @@ void printSearchContactMenu(contact_t* head) {
     scanf("%[^\n]s", searchString);
 
     while (current != NULL) {
-        //sprintf(fullName, "%s %s", current->first_name, current->last_name);
 
         if (strstr(current->first_name, searchString) ||
             strstr(current->last_name, searchString) ||
