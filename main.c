@@ -118,7 +118,7 @@ contact_t* fillList(contact_t*);
  *      LIST FUNCTIONS -----------------------------------------------------------
  * */
 
-// Creates a new contact in memory and returns its pointer
+// Allocates space for a new contact and returns its pointer
 contact_t* createNewContact(contact_t person) {
     contact_t* newContact = (contact_t*)malloc(sizeof(contact_t));
 
@@ -157,10 +157,13 @@ contact_t* deleteContact(int index, contact_t* head) {
     if (getLength(head) <= 1) {
         head = NULL;
     } else {
+        // contact is out of range
         if (index < 0 || getLength(head) <= index) { return head; }
+        // contact is first in list
         if (index == 0) { return deleteFirstContact(head); }
+        // contact is last in list
         if (index == getLength(head)-1) { deleteLastContact(head); return head; }
-
+        
         contact_t* current;
         current = getContactAtIndex(index, head);
 
@@ -231,7 +234,6 @@ contact_t* swapContacts(contact_t* first, contact_t* head) {
         contact_t* second = first->next;
         contact_t* after = second->next; // can be NULL
 
-
         second->next = first;
         first->next = after;
         second->prev = before;
@@ -247,7 +249,8 @@ contact_t* swapContacts(contact_t* first, contact_t* head) {
 // compares specific property (criterion) of two contacts
 short firstFollowsSecond(contact_t* first, contact_t* second, int criterion) {
     int compareResult = 0;
-
+    
+    // select by criterion
     switch (criterion) {
         case 1: // Last Name
             compareResult = strcmp(first->last_name, second->last_name);
@@ -281,12 +284,13 @@ void saveToFile(const char* fileName, contact_t* head) {
 
     f = fopen(fullFileName, "w");
 
+    // file couldn't be saved
     if (f == NULL) {
         printf("\nError: Couldn't save file");
         printf("\n");
         return;
     }
-
+    // prints properties of each contact line by line
     while (current != NULL) {
         fprintf(f, "%s\n", current->first_name);
         fprintf(f, "%s\n", current->last_name);
@@ -299,6 +303,7 @@ void saveToFile(const char* fileName, contact_t* head) {
 
     fclose(f);
 
+    // successful feedback
     printf("\n -> Saved to file '%s' successfully.", fileName);
     printf("\n");
 }
@@ -310,10 +315,10 @@ contact_t* loadFromFile(const char* fileName, contact_t* head) {
     FILE *f = fopen(fullFileName, "r");
     char* line = NULL;
     size_t len = 0;
-    int index = 0;
-    contact_t newContact = {0};
+    int index = 0; // current line
+    contact_t newContact = {0}; // contact placeholder
 
-    // Check if file could be opened
+    // Check if file can be opened
     if (f == NULL) {
         printf("\nError: Couldn't load file");
         printf("\n");
@@ -323,6 +328,7 @@ contact_t* loadFromFile(const char* fileName, contact_t* head) {
     // delete all entries
     head = deleteAllContacts(head);
 
+    // read file line by line and create new contacts in list for each entry
     while (getline(&line, &len, f) != -1) {
         line[strlen(line) - 1] = 0;
 
@@ -353,6 +359,7 @@ contact_t* loadFromFile(const char* fileName, contact_t* head) {
     fclose(f);
     if (line) free(line);
 
+    // successful feedback
     printf("\n -> Loaded from file '%s' successfully.", fileName);
     printf("\n");
 
@@ -363,21 +370,23 @@ contact_t* loadFromFile(const char* fileName, contact_t* head) {
 
 // returns the index of a given contact in the list
 int getIndexOfContact(contact_t* contact, contact_t* head) {
-    int index = 0;
-    contact_t* current = head;
+    int index = 0; // assign zero to integer value index
+    contact_t* current = head; // assign head to contact_t* current
+    // loop through list
     while (current != NULL) {
         if (current == contact) {
-            return index;
+            return index; // returns index
         }
-        index++;
-        current = current->next;
+        index++; // increment index by 1
+        current = current->next; // navigate to next contact
     }
-    return -1; // Couldn't find element
+    return -1; // couldn't find element
 }
 // returns the pointer to the contact at index
 contact_t* getContactAtIndex(int index, contact_t* head) {
     contact_t* current = head;
     int length = getLength(head);
+    
     if (index < 0) index = 0;
     if (index >= length - 1) index = length-1;
     for (int i = 0; i < index; i++) {
@@ -403,8 +412,6 @@ contact_t* getLastContact(contact_t* head) {
     }
     return current;
 }
-
-
 
 
 
@@ -684,12 +691,13 @@ void printSearchContactMenu(contact_t* head) {
     scanf("%[^\n]s", searchString);
 
     while (current != NULL) {
-
+        // checks if searchString is contained in any of contact's properties
         if (strstr(current->first_name, searchString) ||
             strstr(current->last_name, searchString) ||
             strstr(current->email, searchString) ||
             strstr(current->company, searchString) ||
             strstr(current->tel_number, searchString)) {
+            // print matching contact
             printf("\n------- Contact (%d) -----------", getIndexOfContact(current, head) + 1);
             printContact(current);
 
@@ -904,18 +912,33 @@ contact_t* fillList(contact_t* head) {
 }
 // secret
 void printSecret(int code, contact_t* head) {
-    char msg[50+1];
+    char msg[300+1];
+    char command[100];
 
     switch (code) {
         case 42:
             strcpy(msg, "That's the answer to everything.");
             break;
+        case 1972:
+            strcpy(msg, "\"UNIX is basically a simple operating system, but you have to be a genius to understand the simplicity.\""
+                           "\n\n~ Dennis Ritchie");
+            break;
         default:
-            printSelectionError();
-            printMainMenu(head);
+            if (code < 1000 && code > 9) {
+                printf("\nYou did enter '%d', which is not a valid selection."
+                               "\nDo you want to learn something about the number '%d'?\n", code, code);
+                printContinueMenu();
+                // Opens wikipedia article about entered number
+                sprintf(command, "open 'https://en.wikipedia.org/wiki/%d_(number)'", code);
+                system(command);
+            } else {
+                printSelectionError();
+                printMainMenu(head);
+            }
             return;
     }
 
+    printf("\nYou've unlocked a secret message for code %d:\n", code);
     printf("\n%s", msg);
     printf("\n");
     printContinueMenu();
