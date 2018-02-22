@@ -121,6 +121,7 @@ contact_t* fillList(contact_t*);
 // Creates a new contact in memory and returns its pointer
 contact_t* createNewContact(contact_t person) {
     contact_t* newContact = (contact_t*)malloc(sizeof(contact_t));
+
     strcpy(newContact->first_name, person.first_name);
     strcpy(newContact->last_name, person.last_name);
     strcpy(newContact->company, person.company);
@@ -226,9 +227,9 @@ contact_t* sortByCriterion(int criterion, contact_t* head) {
 contact_t* swapContacts(contact_t* first, contact_t* head) {
 
     if (first->next) {
-        contact_t* before = first->prev; // NULL
+        contact_t* before = first->prev; // can be NULL
         contact_t* second = first->next;
-        contact_t* after = second->next; // NULL
+        contact_t* after = second->next; // can be NULL
 
 
         second->next = first;
