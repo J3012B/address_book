@@ -9,19 +9,16 @@
 
 typedef struct contact_t {
     // Data
-    char first_name[20+1];  // 21
-    char last_name[20+1];   // 21
-    char company[30+1];     // 31
-    char email[30+1];       // 31
-    char tel_number[20+1];  // 21
+    char first_name[20+1];
+    char last_name[20+1];
+    char company[30+1];
+    char email[30+1];
+    char tel_number[20+1];
 
     // Pointers
     struct contact_t* prev;
     struct contact_t* next;
 } contact_t;
-
-// TODO: don't declare as global variable
-contact_t* head;
 
 
 /*
@@ -33,27 +30,27 @@ contact_t* head;
  * */
 
 // Main Menu
-void printMainMenu();
+void printMainMenu(contact_t*);
 // Add Contact
-void printAddContactMenu();
+void printAddContactMenu(contact_t*);
 // Show Contacts
-void printContacts();
+void printContacts(contact_t*);
 // Edit Contacts
-void printEditContactMenu();
-void printEditSingleContactMenu(contact_t* contact);
-void printEditPropertyMenu(contact_t* contact, int code);
+void printEditContactMenu(contact_t*);
+void printEditSingleContactMenu(contact_t*, contact_t*);
+void printEditPropertyMenu(contact_t*, int, contact_t*);
 // Search Contact
-void printSearchContactMenu();
+void printSearchContactMenu(contact_t*);
 // Delete Contact
-void printDeleteContactMenu();
+void printDeleteContactMenu(contact_t*);
 // Sort Contacts
-void printSortContactsMenu();
+void printSortContactsMenu(contact_t*);
 // Calculate Memory
-void printMemoryMenu();
+void printMemoryMenu(contact_t*);
 // Save to File
-void printSaveToFileMenu();
+void printSaveToFileMenu(contact_t*);
 // Load from File
-void printLoadFromFileMenu();
+void printLoadFromFileMenu(contact_t*);
 
 
 /*
@@ -61,17 +58,17 @@ void printLoadFromFileMenu();
  * */
 
 // prints contact
-void printContact(contact_t* contact);
+void printContact(contact_t*);
 // prints names of all contacts
-void printContactNames();
+void printContactNames(contact_t*);
 // prints name of single contact
-void printContactName(contact_t* contact);
+void printContactName(contact_t*, contact_t*);
 // prints '- You didn't select anything -'
 void printSelectionError();
 // prints 'Please press Enter to continue'
 void printContinueMenu();
 // prints some secret or handles bad input
-void printSecret(int code);
+void printSecret(int, contact_t*);
 // prints all files in './text-files'
 void printTextFiles();
 
@@ -80,42 +77,42 @@ void printTextFiles();
  * */
 
 // creates new contact entry
-contact_t* createNewContact(contact_t person);
+contact_t* createNewContact(contact_t);
 // adds contact to the end of the list
-void addContact(contact_t contact);
+contact_t* addContact(contact_t, contact_t*);
 // deletes contact at index
-void deleteContact(int index);
+contact_t* deleteContact(int, contact_t*);
 // deletes first contact in list
-void deleteFirstContact();
+contact_t* deleteFirstContact(contact_t*);
 // deletes last contact in list
-void deleteLastContact();
+void deleteLastContact(contact_t*);
 // deletes every contact
-void deleteAllContacts();
+contact_t* deleteAllContacts(contact_t*);
 // sorts by given Criterion (from 1-4)
-void sortByCriterion(int criterion);
+contact_t* sortByCriterion(int, contact_t*);
 // swaps given contact with its following entry
-void swapContacts(contact_t* first);
+contact_t* swapContacts(contact_t*, contact_t*);
 // compares two contacts by given criterion (from 1-4)
-short firstFollowsSecond(contact_t* first, contact_t* second, int criterion);
+short firstFollowsSecond(contact_t*, contact_t*, int);
 // saves list to file
-void saveToFile(const char* fileName);
+void saveToFile(const char*, contact_t*);
 // loads list from file
-void loadFromFile(const char* fileName);
+contact_t* loadFromFile(const char*, contact_t*);
 
 /*
  * LIST HELPER
  * */
 
 // returns index of given contact in list
-int getIndexOfContact(contact_t* contact);
+int getIndexOfContact(contact_t*, contact_t*);
 // returns contact at given index in list
-contact_t* getContactAtIndex(int index);
+contact_t* getContactAtIndex(int, contact_t*);
 // returns the number of contacts in list
-int getLength();
+int getLength(contact_t*);
 // returns the last contact from the list
-contact_t* getLastContact();
+contact_t* getLastContact(contact_t*);
 // fills the list with sample data
-void fillList();
+contact_t* fillList(contact_t*);
 
 /*
  *      LIST FUNCTIONS -----------------------------------------------------------
@@ -135,18 +132,19 @@ contact_t* createNewContact(contact_t person) {
 
     return newContact;
 }
-
 // Adds a contact to the end of the list
-void addContact(contact_t contact) {
+contact_t* addContact(contact_t contact, contact_t* head) {
     contact_t* current = head;
     contact_t* newContact = createNewContact(contact);
     if (head == NULL) {
         head = newContact;
-        return;
+        return head;
     }
     while (current->next != NULL) current = current->next;
     current->next = newContact;
-    newContact->prev =current;
+    newContact->prev = current;
+
+    return head;
 }
 
 /*
@@ -154,41 +152,42 @@ void addContact(contact_t contact) {
  * */
 
 // deletes a contact at a given index
-void deleteContact(int index) {
-    if (getLength() <= 1) {
+contact_t* deleteContact(int index, contact_t* head) {
+    if (getLength(head) <= 1) {
         head = NULL;
     } else {
-        if (index < 0 || index >= getLength()) { return; }
-        if (index == 0) { deleteFirstContact(); return; }
-        if (index == getLength()-1) { deleteLastContact(); return; }
+        if (index < 0 || getLength(head) <= index) { return head; }
+        if (index == 0) { return deleteFirstContact(head); }
+        if (index == getLength(head)-1) { deleteLastContact(head); return head; }
 
         contact_t* current;
-        current = getContactAtIndex(index);
+        current = getContactAtIndex(index, head);
 
         current->prev->next = current->next;
         current->next->prev = current->prev;
 
         free(current);
     }
-}
 
+    return head;
+}
 // deletes first contact in list
-void deleteFirstContact() {
-    contact_t* todelete = head;
+contact_t* deleteFirstContact(contact_t* head) {
+    contact_t* contactToDelete = head;
     head->next->prev = NULL;
     head = head->next;
-    free(todelete);
-}
+    free(contactToDelete);
 
+    return head;
+}
 // deletes last contact in list
-void deleteLastContact() {
-    contact_t* last = getLastContact();
+void deleteLastContact(contact_t* head) {
+    contact_t* last = getLastContact(head);
     last->prev->next = NULL;
     free(last);
 }
-
 // deletes all contacts
-void deleteAllContacts() {
+contact_t* deleteAllContacts(contact_t* head) {
     contact_t* current = head;
 
     if (current != NULL) {
@@ -200,6 +199,8 @@ void deleteAllContacts() {
         free(current);
         head = NULL;
     }
+
+    return head;
 }
 
 /*
@@ -207,22 +208,22 @@ void deleteAllContacts() {
  * */
 
 // sorts list using 'bubble sort'
-void sortByCriterion(int criterion) {
-
+contact_t* sortByCriterion(int criterion, contact_t* head) {
     int i, j;
     contact_t* current;
 
-    for (i = getLength(); i > 1; i--) {
+    for (i = getLength(head); i > 1; i--) {
         for (j = 0; j < i-1; j++) {
-            current = getContactAtIndex(j);
+            current = getContactAtIndex(j, head);
             if (firstFollowsSecond(current, current->next, criterion))
-                swapContacts(getContactAtIndex(j));
+                head = swapContacts(getContactAtIndex(j, head), head);
         }
     }
-}
 
+    return head;
+}
 // swaps contact with its next contact
-void swapContacts(contact_t* first) {
+contact_t* swapContacts(contact_t* first, contact_t* head) {
 
     if (first->next) {
         contact_t* before = first->prev; // NULL
@@ -239,8 +240,9 @@ void swapContacts(contact_t* first) {
         if (after != NULL) after->prev = first;
         if (first == head) head = second;
     }
-}
 
+    return head;
+}
 // compares specific property (criterion) of two contacts
 short firstFollowsSecond(contact_t* first, contact_t* second, int criterion) {
     int compareResult = 0;
@@ -269,7 +271,8 @@ short firstFollowsSecond(contact_t* first, contact_t* second, int criterion) {
  *      SAVE/LOAD FILE
  * */
 
-void saveToFile(const char* fileName) {
+// saves to file with given name
+void saveToFile(const char* fileName, contact_t* head) {
     contact_t* current = head;
     char fullFileName[100+1];
     sprintf(fullFileName, "./text-files/%s", fileName);
@@ -307,8 +310,8 @@ void saveToFile(const char* fileName) {
     printf("\n -> Saved to file '%s' successfully.", fileName);
     printf("\n");
 }
-
-void loadFromFile(const char* fileName) {
+// loads from file with given name
+contact_t* loadFromFile(const char* fileName, contact_t* head) {
     char fullFileName[100+1];
     sprintf(fullFileName, "./text-files/%s", fileName);
 
@@ -322,11 +325,11 @@ void loadFromFile(const char* fileName) {
     if (f == NULL) {
         printf("\nError: Couldn't load file");
         printf("\n");
-        return;
+        return head;
     }
 
     // delete all entries
-    deleteAllContacts();
+    head = deleteAllContacts(head);
 
     while (getline(&line, &len, f) != -1) {
         line[strlen(line) - 1] = 0;
@@ -346,7 +349,7 @@ void loadFromFile(const char* fileName) {
                 break;
             case 4:
                 strcpy(newContact.tel_number, line);
-                addContact(newContact);
+                head = addContact(newContact, head);
                 break;
             default:
                 break;
@@ -360,12 +363,14 @@ void loadFromFile(const char* fileName) {
 
     printf("\n -> Loaded from file '%s' successfully.", fileName);
     printf("\n");
+
+    return head;
 }
 
 /* HELPER */
 
 // returns the index of a given contact in the list
-int getIndexOfContact(contact_t* contact) {
+int getIndexOfContact(contact_t* contact, contact_t* head) {
     int index = 0;
     contact_t* current = head;
     while (current != NULL) {
@@ -378,9 +383,9 @@ int getIndexOfContact(contact_t* contact) {
     return -1; // Couldn't find element
 }
 // returns the pointer to the contact at index
-contact_t* getContactAtIndex(int index) {
+contact_t* getContactAtIndex(int index, contact_t* head) {
     contact_t* current = head;
-    int length = getLength();
+    int length = getLength(head);
     if (index < 0) index = 0;
     if (index >= length - 1) index = length-1;
     for (int i = 0; i < index; i++) {
@@ -389,7 +394,7 @@ contact_t* getContactAtIndex(int index) {
     return current;
 }
 // returns length of list
-int getLength() {
+int getLength(contact_t* head) {
     int length = 0;
     contact_t* current = head;
     while (current != NULL) {
@@ -399,7 +404,7 @@ int getLength() {
     return length;
 }
 // returns pointer to last element in list ('NULL' when list is empty)
-contact_t* getLastContact() {
+contact_t* getLastContact(contact_t* head) {
     contact_t* current = head;
     while (current->next != NULL) {
         current = current->next;
@@ -418,7 +423,7 @@ contact_t* getLastContact() {
 
 /* MENUS */
 
-void printMainMenu() {
+void printMainMenu(contact_t* head) {
     int a = 0; // User input
 
     printf("\n--------------------------------");
@@ -444,42 +449,41 @@ void printMainMenu() {
 
     switch (a) {
         case 1:
-            printAddContactMenu();
+            printAddContactMenu(head);
             break;
         case 2:
-            printContacts();
+            printContacts(head);
             break;
         case 3:
-            printEditContactMenu();
+            printEditContactMenu(head);
             break;
         case 4:
-            printSearchContactMenu();
+            printSearchContactMenu(head);
             break;
         case 5:
-            printDeleteContactMenu();
+            printDeleteContactMenu(head);
             break;
         case 6:
-            printSortContactsMenu();
+            printSortContactsMenu(head);
             break;
         case 7:
-            printMemoryMenu();
+            printMemoryMenu(head);
             break;
         case 8:
-            printLoadFromFileMenu();
+            printLoadFromFileMenu(head);
             break;
         case 9:
-            printSaveToFileMenu();
+            printSaveToFileMenu(head);
             break;
         case 0:
             return;
         default:
-            printSecret(a);
+            printSecret(a, head);
             return;
     }
 
 }
-
-void printAddContactMenu() {
+void printAddContactMenu(contact_t* head) {
     contact_t newContact = {0};
 
     printf("\n--------------------------------");
@@ -496,46 +500,45 @@ void printAddContactMenu() {
     printf("Telephone : ");
     scanf("%s", newContact.tel_number);
 
-    addContact(newContact);
+    head = addContact(newContact, head);
 
     printf("\n -> %s %s was added to your Address Book.", newContact.first_name, newContact.last_name);
     printf("\n");
 
     printContinueMenu();
-    printMainMenu();
+    printMainMenu(head);
 }
-
-void printDeleteContactMenu() {
+void printDeleteContactMenu(contact_t* head) {
     int a = 0; // User Input
-    int oldLen = getLength(); // Length of list before deletion
+    int oldLen = getLength(head); // Length of list before deletion
 
     printf("\n--------------------------------");
     printf("\n-------- Delete Contact --------");
     printf("\n");
-    if (getLength() == 0) {
+    if (getLength(head) == 0) {
         printf("\nYou have no entries yet.");
         printf("\n");
     } else {
         printf("\n- Select contact to delete -");
         printf("\n");
-        printContactNames();
+        printContactNames(head);
         printf("\n(0) Cancel");
         printf("\n");
         printf("\nPlease enter: ");
         scanf("%d", &a);
 
         if (a == 0) {
-            printMainMenu();
+            printMainMenu(head);
             return;
         } else {
             a--;
 
-            contact_t* deleted = getContactAtIndex(a);
-            deleteContact(a);
+            contact_t* deleted = getContactAtIndex(a, head);
+            head = deleteContact(a, head);
 
             if (a < 0 || a >= oldLen) {
                 printSelectionError();
-                printDeleteContactMenu();
+                printDeleteContactMenu(head);
                 return;
             } else {
                 printf("\n -> %s %s was deleted from your address book.", deleted->first_name, deleted->last_name);
@@ -545,10 +548,9 @@ void printDeleteContactMenu() {
     }
 
     printContinueMenu();
-    printMainMenu();
+    printMainMenu(head);
 }
-
-void printContacts() {
+void printContacts(contact_t* head) {
     contact_t* current = head;
 
     printf("\n--------------------------------");
@@ -562,16 +564,15 @@ void printContacts() {
     }
 
     while(current != NULL) {
-        printf("\n------- Contact (%d) -----------", getIndexOfContact(current) + 1);
+        printf("\n------- Contact (%d) -----------", getIndexOfContact(current, head) + 1);
         printContact(current);
 
         current = current->next;
     }
     printContinueMenu();
-    printMainMenu();
+    printMainMenu(head);
 }
-
-void printEditContactMenu() {
+void printEditContactMenu(contact_t* head) {
     int a = 0; // User Input
 
     printf("\n--------------------------------");
@@ -579,25 +580,25 @@ void printEditContactMenu() {
     printf("\n");
     printf("\n- Select contact to edit -");
     printf("\n");
-    printContactNames();
+    printContactNames(head);
     printf("\n(0) Cancel");
     printf("\n");
     printf("\nPlease Enter: ");
 
     scanf("%d", &a);
 
-    if (a > 0 && a <= getLength()) {
+    if (a > 0 && a <= getLength(head)) {
         a--;
-        printEditSingleContactMenu(getContactAtIndex(a));
+        printEditSingleContactMenu(getContactAtIndex(a, head), head);
     } else if (a == 0) {
-        printMainMenu();
+        printMainMenu(head);
     } else {
         printSelectionError();
-        printEditContactMenu();
+        printEditContactMenu(head);
     }
 
 }
-void printEditSingleContactMenu(contact_t* contact) {
+void printEditSingleContactMenu(contact_t* contact, contact_t* head) {
     int a;
 
     printf("\n--------------------------------");
@@ -618,16 +619,16 @@ void printEditSingleContactMenu(contact_t* contact) {
     scanf("%d", &a);
 
     if (a > 0 && a < 6) {
-        printEditPropertyMenu(contact, a);
+        printEditPropertyMenu(contact, a, head);
     } else if (a == 0) {
-        printEditContactMenu();
+        printEditContactMenu(head);
     } else {
         printSelectionError();
-        printEditSingleContactMenu(contact);
+        printEditSingleContactMenu(contact, head);
     }
 
 }
-void printEditPropertyMenu(contact_t* contact, int code) {
+void printEditPropertyMenu(contact_t* contact, int code, contact_t* head) {
     printf("\n--------------------------------");
     printf("\n--------- Edit Contact ---------");
     printf("\n");
@@ -662,21 +663,19 @@ void printEditPropertyMenu(contact_t* contact, int code) {
     printf("\n");
 
     printContinueMenu();
-    printEditSingleContactMenu(contact);
+    printEditSingleContactMenu(contact, head);
 }
-
-void printSearchContactMenu() {
+void printSearchContactMenu(contact_t* head) {
     char searchString[40+1]; // User Input
-    char fullName[40+1];     // first_name + " " + last_name
     contact_t* current = head;
     int entriesFound = 0;
 
     printf("\n--------------------------------");
     printf("\n------ Search for Contact ------");
     printf("\n");
-    printf("\n- Search by full name -");
+    printf("\n- Search by search string -");
     printf("\n");
-    printf("\nWill print all contacts containing\nyour query in any of their data.");
+    printf("\nWill print all contacts containing\nyour search string in any of their information.");
     printf("\n");
     printf("\nPlease enter: ");
     scanf("%s", searchString);
@@ -689,7 +688,7 @@ void printSearchContactMenu() {
             strstr(current->email, searchString) ||
             strstr(current->company, searchString) ||
             strstr(current->tel_number, searchString)) {
-            printf("\n------- Contact (%d) -----------", getIndexOfContact(current) + 1);
+            printf("\n------- Contact (%d) -----------", getIndexOfContact(current, head) + 1);
             printContact(current);
 
             entriesFound++;
@@ -710,10 +709,9 @@ void printSearchContactMenu() {
     }
 
     printContinueMenu();
-    printMainMenu();
+    printMainMenu(head);
 }
-
-void printSortContactsMenu() {
+void printSortContactsMenu(contact_t* head) {
     int a = 0; // User Input
 
     printf("\n--------------------------------");
@@ -732,29 +730,27 @@ void printSortContactsMenu() {
     scanf("%d", &a);
 
     if (a > 0 && a < 5) {
-        sortByCriterion(a);
+        head = sortByCriterion(a, head);
         printf("\n -> Sorted list successfully.");
         printf("\n");
 
         printContinueMenu();
-        printMainMenu();
+        printMainMenu(head);
     } else if (a == 0) {
-        printMainMenu();
+        printMainMenu(head);
     } else {
         printSelectionError();
-        printSortContactsMenu();
+        printSortContactsMenu(head);
     }
 }
-
-void printMemoryMenu() {
-    printf("\n -> Your address book has a size of %lu bytes.", getLength() * sizeof(contact_t));
+void printMemoryMenu(contact_t* head) {
+    printf("\n -> Your address book has a size of %lu bytes.", getLength(head) * sizeof(contact_t));
     printf("\n");
 
     printContinueMenu();
-    printMainMenu();
+    printMainMenu(head);
 }
-
-void printSaveToFileMenu() {
+void printSaveToFileMenu(contact_t* head) {
     char fileName[30+1];
 
     printf("\n--------------------------------");
@@ -767,13 +763,12 @@ void printSaveToFileMenu() {
 
     scanf("%s", fileName);
 
-    saveToFile(fileName);
+    saveToFile(fileName, head);
 
     printContinueMenu();
-    printMainMenu();
+    printMainMenu(head);
 }
-
-void printLoadFromFileMenu() {
+void printLoadFromFileMenu(contact_t* head) {
     char fileName[30+1];
 
     printf("\n--------------------------------");
@@ -786,12 +781,10 @@ void printLoadFromFileMenu() {
 
     scanf("%s", fileName);
 
-    loadFromFile(fileName);
-
-    //printf("\n -> Loaded from file '%s' successfully.", FILE_NAME);
+    head = loadFromFile(fileName, head);
 
     printContinueMenu();
-    printMainMenu();
+    printMainMenu(head);
 }
 
 
@@ -807,17 +800,17 @@ void printContact(contact_t* contact) {
     printf("\n");
 }
 // prints only the names of all contacts
-void printContactNames() {
+void printContactNames(contact_t* head) {
     contact_t* current = head;
     while (current != NULL) {
-        printContactName(current);
+        printContactName(current, head);
         current = current->next;
     }
     printf("\n");
 }
 // prints only the name of one contact
-void printContactName(contact_t* contact) {
-    printf("\n(%d) %s %s (%s)", getIndexOfContact(contact) + 1, contact->first_name, contact->last_name, contact->company);
+void printContactName(contact_t* contact, contact_t* head) {
+    printf("\n(%d) %s %s (%s)", getIndexOfContact(contact, head) + 1, contact->first_name, contact->last_name, contact->company);
 }
 // prints '- Press Enter to continue -' and waits for 'enter' key
 void printContinueMenu() {
@@ -849,21 +842,21 @@ void printTextFiles() {
 
 
 /*
- *      MAIN --------------------------------------------
+ *      MAIN ---------------------------------------------------------------------
  * */
 
 int main() {
+    contact_t* head = NULL; // first element of list
 
-    fillList();
-    printMainMenu();
-
+    head = fillList(head);  // fill list with sample data
+    printMainMenu(head);    // prints main menu
 
     return 0;
 }
 
 
-
-void fillList() {
+// fills list with sample data
+contact_t* fillList(contact_t* head) {
 
     contact_t person = {0};
 
@@ -873,7 +866,7 @@ void fillList() {
     strcpy(person.email, "bill@microsoft.com");
     strcpy(person.tel_number, "84720583");
 
-    addContact(person);
+    head = addContact(person, head);
 
     strcpy(person.first_name, "Steve");
     strcpy(person.last_name, "Jobs");
@@ -881,7 +874,7 @@ void fillList() {
     strcpy(person.email, "steve@apple.com");
     strcpy(person.tel_number, "37462940");
 
-    addContact(person);
+    head = addContact(person, head);
 
     strcpy(person.first_name, "Elon");
     strcpy(person.last_name, "Musk");
@@ -889,7 +882,7 @@ void fillList() {
     strcpy(person.email, "elon@spacex.com");
     strcpy(person.tel_number, "20572948");
 
-    addContact(person);
+    head = addContact(person, head);
 
     strcpy(person.first_name, "Mark");
     strcpy(person.last_name, "Zuckerberg");
@@ -897,10 +890,12 @@ void fillList() {
     strcpy(person.email, "zuck@facebook.com");
     strcpy(person.tel_number, "52837783");
 
-    addContact(person);
-}
+    head = addContact(person, head);
 
-void printSecret(int code) {
+    return head;
+}
+// secret
+void printSecret(int code, contact_t* head) {
     char msg[50+1];
 
     switch (code) {
@@ -909,7 +904,7 @@ void printSecret(int code) {
             break;
         default:
             printSelectionError();
-            printMainMenu();
+            printMainMenu(head);
             return;
     }
 
