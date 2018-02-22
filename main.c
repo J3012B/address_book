@@ -275,7 +275,7 @@ short firstFollowsSecond(contact_t* first, contact_t* second, int criterion) {
 void saveToFile(const char* fileName, contact_t* head) {
     contact_t* current = head;
     char fullFileName[100+1];
-    sprintf(fullFileName, "./text-files/%s", fileName);
+    sprintf(fullFileName, "./%s", fileName);
     FILE *f;
 
     f = fopen(fullFileName, "w");
@@ -293,15 +293,6 @@ void saveToFile(const char* fileName, contact_t* head) {
         fprintf(f, "%s\n", current->email);
         fprintf(f, "%s\n", current->tel_number);
 
-        /*  NICE
-        fprintf(f, "First Name: %s\n", current->first_name);
-        fprintf(f, "Last Name : %s\n", current->last_name);
-        fprintf(f, "Company   : %s\n", current->company);
-        fprintf(f, "Email     : %s\n", current->email);
-        fprintf(f, "Telephone : %s\n", current->tel_number);
-        fprintf(f, "\n");
-         */
-
         current = current->next;
     }
 
@@ -313,7 +304,7 @@ void saveToFile(const char* fileName, contact_t* head) {
 // loads from file with given name
 contact_t* loadFromFile(const char* fileName, contact_t* head) {
     char fullFileName[100+1];
-    sprintf(fullFileName, "./text-files/%s", fileName);
+    sprintf(fullFileName, "./%s", fileName);
 
     FILE *f = fopen(fullFileName, "r");
     char* line = NULL;
@@ -840,9 +831,9 @@ void printSelectionError() {
 void printTextFiles() {
     DIR *d;
     struct dirent *dir;
-    d = opendir("./text-files");
+    d = opendir("./files");
     if (d) {
-        printf("\nFiles in './text-files': \n");
+        printf("\nFiles in 'files/': \n");
         while ((dir = readdir(d)) != NULL) {
             printf("\n%s", dir->d_name);
         }
@@ -856,10 +847,16 @@ void printTextFiles() {
  *      MAIN ---------------------------------------------------------------------
  * */
 
-int main() {
+int main(int argc, const char* argv[], const char * env[]) {
     contact_t* head = NULL; // first element of list
 
-    head = fillList(head);  // fill list with sample data
+    if (argc == 2) {
+        head = loadFromFile(argv[1], head);
+        printContinueMenu();
+    } else {
+        head = fillList(head);  // fill list with sample data
+    }
+
     printMainMenu(head);    // prints main menu
 
     return 0;
