@@ -490,15 +490,20 @@ void printAddContactMenu(contact_t* head) {
     printf("\n-------- Add Contact -----------");
     printf("\n");
     printf("\nFirst Name: ");
-    scanf("%s", newContact.first_name);
+    fgets(newContact.first_name, 100, stdin);
+    scanf("%[^\n]s", newContact.first_name);
     printf("Last Name : ");
-    scanf("%s", newContact.last_name);
+    fgets(newContact.last_name, 100, stdin);
+    scanf("%[^\n]s", newContact.last_name);
     printf("Company   : ");
-    scanf("%s", newContact.company);
+    fgets(newContact.company, 100, stdin);
+    scanf("%[^\n]s", newContact.company);
     printf("Email     : ");
-    scanf("%s", newContact.email);
+    fgets(newContact.email, 100, stdin);
+    scanf("%[^\n]s", newContact.email);
     printf("Telephone : ");
-    scanf("%s", newContact.tel_number);
+    fgets(newContact.tel_number, 100, stdin);
+    scanf("%[^\n]s", newContact.tel_number);
 
     head = addContact(newContact, head);
 
@@ -637,23 +642,28 @@ void printEditPropertyMenu(contact_t* contact, int code, contact_t* head) {
     switch (code) {
         case 1:
             printf("\nNew First Name: ");
-            scanf("%s", contact->first_name);
+            fgets(contact->first_name, 100, stdin);
+            scanf("%[^\n]s", contact->first_name);
             break;
         case 2:
             printf("\nNew Last Name: ");
-            scanf("%s", contact->last_name);
+            fgets(contact->last_name, 100, stdin);
+            scanf("%[^\n]s", contact->last_name);
             break;
         case 3:
             printf("\nNew Company: ");
-            scanf("%s", contact->company);
+            fgets(contact->company, 100, stdin);
+            scanf("%[^\n]s", contact->company);
             break;
         case 4:
             printf("\nNew Email: ");
-            scanf("%s", contact->email);
+            fgets(contact->email, 100, stdin);
+            scanf("%[^\n]s", contact->email);
             break;
         case 5:
             printf("\nNew Tel. Number: ");
-            scanf("%s", contact->tel_number);
+            fgets(contact->tel_number, 100, stdin);
+            scanf("%[^\n]s", contact->tel_number);
             break;
         default:
             break;
@@ -678,7 +688,8 @@ void printSearchContactMenu(contact_t* head) {
     printf("\nWill print all contacts containing\nyour search string in any of their information.");
     printf("\n");
     printf("\nPlease enter: ");
-    scanf("%s", searchString);
+    fgets(searchString, 100, stdin);
+    scanf("%[^\n]s", searchString);
 
     while (current != NULL) {
         //sprintf(fullName, "%s %s", current->first_name, current->last_name);
